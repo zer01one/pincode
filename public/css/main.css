@@ -1,0 +1,38 @@
+:root{
+    --bg: #2b2b2b;
+    --bg-v2: #3b3b3b;
+    --primary: #8156a6;
+    --secondary: #cacaca;
+}
+
+body{
+    background-color: var(--bg);
+}
+
+input, input.form-control, input.form-control:focus{
+    border-color: var(--primary);
+    border-width: 4px;
+    color: var(--secondary);
+    outline: none;
+    background-color: var(--bg-v2);
+    border-radius: 1rem;
+}
+
+input.form-control:focus{
+    box-shadow: 0 0 10px var(--primary), 0 0 5px var(--primary);
+}
+
+.pin-input{
+    width: 4rem;
+    height: 4rem;
+    /* caret-color: transparent; */
+    font-size: 2rem;
+}
+
+/* .pin-input::selection{
+    скуф
+} */
+
+/* input, input.form-control{
+    border-color: var(--primary);
+} */
