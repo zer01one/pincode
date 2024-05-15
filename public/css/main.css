@@ -29,6 +29,14 @@ input.form-control:focus{
     font-size: 2rem;
 }
 
+p, span{
+    color: var(--secondary);
+}
+
+.primary-color{
+    color: var(--primary);
+}
+
 /* .pin-input::selection{
     скуф
 } */
