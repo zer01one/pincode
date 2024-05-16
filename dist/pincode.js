@@ -1,6 +1,5 @@
 // TODO: regexp
 // TODO: autofocus
-// TODO: copypast
 
 ; (function (name, definition) {
     if (typeof module !== 'undefined') module.exports = definition();
