@@ -5,7 +5,7 @@
 }('Pincode', function () {
     function init(inputs, enters, regexps) {
         (function (inputs, regexps) {
-            console.log('regexps', regexps);
+            // console.log('regexps', regexps);
             inputs.forEach((input, index, array) => {
                 input.oninput = function (e) {
                     write(e.target, excludeTextByRegExp(e.target.value, regexps[index]));
