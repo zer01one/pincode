@@ -1,36 +1,36 @@
-// TODO: regexp
-// TODO: autofocus
-
 ; (function (name, definition) {
     if (typeof module !== 'undefined') module.exports = definition();
     else if (typeof define === 'function' && typeof define.amd === 'object') define(definition);
     else this[name] = definition();
 }('Pincode', function () {
-    function init(inputs, enters) {
-        Array.from(inputs).forEach((input, index, array) => {
-            input.oninput = function (e) {
-                write(e.target, e.target.value);
-                enters?.(size(array), value(array));
-                isFilled(input) && (focusing(array[index + 1]), bluring(input));
-            };
+    function init(inputs, enters, regexps) {
+        (function (inputs, regexps) {
+            console.log('regexps', regexps);
+            inputs.forEach((input, index, array) => {
+                input.oninput = function (e) {
+                    write(e.target, excludeTextByRegExp(e.target.value, regexps[index]));
+                    enters?.(size(array), value(array));
+                    isFilled(input) && (focusing(array[index + 1]), bluring(input));
+                };
 
-            input.onclick = input.onfocus = function (e) {
-                insideFocusEnd(e.target);
-            };
+                input.onclick = input.onfocus = function (e) {
+                    insideFocusEnd(e.target);
+                };
 
-            input.onkeyup = function (e) {
-                applyControllers(e.key, e.target, array, index);
-            };
+                input.onkeyup = function (e) {
+                    applyControllers(e.key, e.target, array, index);
+                };
 
-            input.onpaste = function (e) {
-                e.preventDefault();
-                getSchemeCharsByInputs(e.clipboardData.getData('text').split(''), array).forEach((value, index) => write(array[index], value));
-                enters?.(size(array), value(array));
-                updateFocus(array);
-            };
-        });
+                input.onpaste = function (e) {
+                    e.preventDefault();
+                    getSchemeCharsByInputs(e.clipboardData.getData('text').split(''), array, regexps).forEach((value, index) => write(array[index], value));
+                    enters?.(size(array), value(array));
+                    updateFocus(array);
+                };
+            });
 
-        updateFocus(Array.from(inputs));
+            updateFocus(inputs);
+        })(Array.from(inputs), fillRegExpScheme(inputs.length, typifyRegExpArg(regexps, inputs.length)));
     }
 
     function applyControllers(key, input, inputs, index) {
@@ -85,12 +85,12 @@
         return value?.slice?.(-(maxlength)) || '';
     }
 
-    function getSchemeCharsByInputs(chars, inputs) {
-        return inputs.map(input => startSpliceCharsByInput(chars, input));
+    function getSchemeCharsByInputs(chars, inputs, regexps) {
+        return inputs.map((input, index) => startSpliceCharsByInput(chars, input, regexps[index]));
     }
 
-    function startSpliceCharsByInput(chars, input) {
-        return chars.splice(0, defineMaxlength(input.dataset.maxlength))
+    function startSpliceCharsByInput(chars, input, regexp) {
+        return new Array(defineMaxlength(input.dataset.maxlength)).fill('').map(i => (i = chars.findIndex(char => regexp.test(char)), isNotMinus1(i) ? chars.splice(i, 1) : ''));
     }
 
     function write(input, val) {
@@ -109,8 +109,32 @@
         return (window.parseInt(input?.value?.length) || 0) + modifier <= 0;
     }
 
+    function isNotMinus1(num) {
+        return num !== -1;
+    }
+
     function getClosestNotFilledInputIndex(inputs) {
         return inputs.findIndex(isNotFilled);
+    }
+
+    function getStandardRegExp() {
+        return new RegExp('\\d', 'g');
+    }
+
+    function typifyRegExpArg(arg, length) {
+        return arg instanceof RegExp ? new Array(length).fill(arg) : (Array.isArray(arg) ? arg : []);
+    }
+
+    function fillRegExpScheme(length, arr) {
+        return new Array(length).fill(undefined).map((i, index) => (arr[index] instanceof RegExp) ? arr[index] : getStandardRegExp());
+    }
+
+    function excludeCharsByRegExp(chars, regexp) {
+        return chars.filter(char => regexp.test(char));
+    }
+
+    function excludeTextByRegExp(text, regexp) {
+        return text.match(regexp)?.join('') || '';
     }
 
     return {
