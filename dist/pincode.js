@@ -29,6 +29,8 @@
                 updateFocus(array);
             };
         });
+
+        updateFocus(Array.from(inputs));
     }
 
     function applyControllers(key, input, inputs, index) {
