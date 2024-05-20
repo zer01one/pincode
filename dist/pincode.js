@@ -3,34 +3,39 @@
     else if (typeof define === 'function' && typeof define.amd === 'object') define(definition);
     else this[name] = definition();
 }('Pincode', function () {
-    function init(inputs, enters, regexps) {
-        (function (inputs, regexps) {
-            // console.log('regexps', regexps);
-            inputs.forEach((input, index, array) => {
-                input.oninput = function (e) {
-                    write(e.target, excludeTextByRegExp(e.target.value, regexps[index]));
-                    enters?.(size(array), value(array));
-                    isFilled(input) && (focusing(array[index + 1]), bluring(input));
-                };
+    function init(container, inputs, enters, regexps) {
+        (function (inputs) {
+            (function (container) {
+                (function (regexps) {
+                    inject(container, inputs);
+                    updateFocus(inputs);
 
-                input.onclick = input.onfocus = function (e) {
-                    insideFocusEnd(e.target);
-                };
+                    // console.log('regexps', regexps);
+                    inputs.forEach((input, index, array) => {
+                        input.oninput = function (e) {
+                            write(e.target, excludeTextByRegExp(e.target.value, regexps[index]));
+                            enters?.(size(array), value(array));
+                            isFilled(input) && (focusing(array[index + 1]), bluring(input));
+                        };
 
-                input.onkeyup = function (e) {
-                    applyControllers(e.key, e.target, array, index);
-                };
+                        input.onclick = input.onfocus = function (e) {
+                            insideFocusEnd(e.target);
+                        };
 
-                input.onpaste = function (e) {
-                    e.preventDefault();
-                    getSchemeCharsByInputs(e.clipboardData.getData('text').split(''), array, regexps).forEach((value, index) => write(array[index], value));
-                    enters?.(size(array), value(array));
-                    updateFocus(array);
-                };
-            });
+                        input.onkeyup = function (e) {
+                            applyControllers(e.key, e.target, array, index);
+                        };
 
-            updateFocus(inputs);
-        })(Array.from(inputs), fillRegExpScheme(inputs.length, typifyRegExpArg(regexps, inputs.length)));
+                        input.onpaste = function (e) {
+                            e.preventDefault();
+                            getSchemeCharsByInputs(e.clipboardData.getData('text').split(''), array, regexps).forEach((value, index) => write(array[index], value));
+                            enters?.(size(array), value(array));
+                            updateFocus(array);
+                        };
+                    });
+                })(fillRegExpScheme(inputs.length, typifyRegExpArg(regexps, inputs.length)));
+            })(typifyContainerArg(container, inputs));
+        })(typifyInputsArg(inputs, 4));
     }
 
     function applyControllers(key, input, inputs, index) {
@@ -135,6 +140,66 @@
 
     function excludeTextByRegExp(text, regexp) {
         return text.match(regexp)?.join('') || '';
+    }
+
+    function forceToArray(assume) {
+        return Array.from(assume || []);
+    }
+
+    function typifyInputsArg(inputs, length) {
+        return new Array(inputs?.length || length).fill(undefined).map((i, index) => (inputs?.[index] instanceof HTMLInputElement) ? inputs?.[index] : createInput());
+    }
+
+    function createInput() {
+        return setAttrs(createElem('input'), { type: 'text', 'data-maxlength': '1', autocomplete: 'off', class: 'pincode-input' });
+    }
+
+    function typifyContainerArg(container, inputs) {
+        return container instanceof HTMLElement ? container : document.querySelector('.pincode-container') ? document.querySelector('.pincode-container') : (findClosestContainerFromInputs(inputs) || setClasses(createElem('div'), 'pincode-container'));
+    }
+
+    function findClosestContainerFromInputs(inputs) {
+        return inputs.find(input => input.parentNode).parentNode;
+    }
+
+    function inject(container, inputs) {
+        inputs.forEach(container.appendChild, container);
+    }
+
+    function setClasses(elem, classlist) {
+        return ((elem.classList.value = classlist), elem);
+    }
+
+    function setText(elem, text) {
+        return ((elem.textContent = text), elem);
+    }
+
+    function createElem(name) {
+        return document.createElement(name);
+    }
+
+    function setStyle(elem, name, value) {
+        return (elem.style.setProperty(name, value), elem);
+    }
+
+    function setStyles(elem, styles) {
+        return (Object.entries(styles).forEach(entrie => setStyle(elem, ...entrie)), elem);
+    }
+
+    function setAttr(elem, name, value) {
+        return (elem.setAttribute(name, value), elem);
+    }
+
+    function setAttrs(elem, attrs) {
+        return (Object.entries(attrs).forEach(entrie => setAttr(elem, ...entrie)), elem);
+    }
+
+    function removeElem(elem) {
+        return elem.parentElement.removeChild(elem);
+    }
+
+    function removeElems(elems) {
+        return Array.from(elems).forEach(removeElem);
     }
 
     return {
