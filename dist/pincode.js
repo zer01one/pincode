@@ -3,7 +3,7 @@
     else if (typeof define === 'function' && typeof define.amd === 'object') define(definition);
     else this[name] = definition();
 }('Pincode', function () {
-    function init(container, inputs, enters, regexps) {
+    function init(container, inputs, onenters, regexps) {
         (function (inputs) {
             (function (container) {
                 (function (regexps) {
@@ -14,7 +14,7 @@
                     inputs.forEach((input, index, array) => {
                         input.oninput = function (e) {
                             write(e.target, excludeTextByRegExp(e.target.value, regexps[index]));
-                            enters?.(size(array), value(array));
+                            onenters?.(size(array), value(array));
                             isFilled(input) && (focusing(array[index + 1]), bluring(input));
                         };
 
@@ -29,7 +29,7 @@
                         input.onpaste = function (e) {
                             e.preventDefault();
                             getSchemeCharsByInputs(e.clipboardData.getData('text').split(''), array, regexps).forEach((value, index) => write(array[index], value));
-                            enters?.(size(array), value(array));
+                            onenters?.(size(array), value(array));
                             updateFocus(array);
                         };
                     });
