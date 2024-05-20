@@ -163,7 +163,7 @@
     }
 
     function inject(container, inputs) {
-        inputs.forEach(container.appendChild, container);
+        return (inputs.forEach(container.appendChild, container), container);
     }
 
     function setClasses(elem, classlist) {
